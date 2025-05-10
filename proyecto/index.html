@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+    }
+    .calculadora {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    input[type="text"] {
+      width: 100%;
+      font-size: 1.5em;
+      margin-bottom: 10px;
+      padding: 10px;
+      text-align: right;
+    }
+    .botones {
+      display: grid;
+      grid-template-columns: repeat(4, 60px);
+      gap: 10px;
+      justify-content: center;
+    }
+    button {
+      padding: 15px;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculadora">
+    <input type="text" id="pantalla" disabled>
+    <div class="botones">
+      <button onclick="agregar('7')">7</button>
+      <button onclick="agregar('8')">8</button>
+      <button onclick="agregar('9')">9</button>
+      <button onclick="agregar('/')">/</button>
+
+      <button onclick="agregar('4')">4</button>
+      <button onclick="agregar('5')">5</button>
+      <button onclick="agregar('6')">6</button>
+      <button onclick="agregar('*')">*</button>
+
+      <button onclick="agregar('1')">1</button>
+      <button onclick="agregar('2')">2</button>
+      <button onclick="agregar('3')">3</button>
+      <button onclick="agregar('-')">-</button>
+
+      <button onclick="agregar('0')">0</button>
+      <button onclick="agregar('.')">.</button>
+      <button onclick="calcular()">=</button>
+      <button onclick="agregar('+')">+</button>
+
+      <button onclick="limpiar()" style="grid-column: span 4; background-color: #f88;">C</button>
+    </div>
+  </div>
+
+  <script>
+    const pantalla = document.getElementById('pantalla');
+
+    function agregar(valor) {
+      pantalla.value += valor;
+    }
+
+    function calcular() {
+      try {
+        pantalla.value = eval(pantalla.value);
+      } catch {
+        pantalla.value = 'Error';
+      }
+    }
+
+    function limpiar() {
+      pantalla.value = '';
+    }
+  </script>
+</body>
+</html>
