@@ -1,89 +1,843 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Calculadora</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f0f0f0;
-    }
-    .calculadora {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    }
-    input[type="text"] {
-      width: 100%;
-      font-size: 1.5em;
-      margin-bottom: 10px;
-      padding: 10px;
-      text-align: right;
-    }
-    .botones {
-      display: grid;
-      grid-template-columns: repeat(4, 60px);
-      gap: 10px;
-      justify-content: center;
-    }
-    button {
-      padding: 15px;
-      font-size: 1.2em;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubo de Rubik 3D Interactivo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            touch-action: none;
+            overflow-x: hidden;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .cube-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            width: 100%;
+            position: relative;
+        }
+        
+        .cube-container {
+            perspective: 1500px;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            cursor: grab;
+            user-select: none;
+        }
+        
+        .cube-container.grabbing {
+            cursor: grabbing;
+        }
+        
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s;
+            transform: rotateX(-20deg) rotateY(-30deg);
+        }
+        
+        .face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border: 3px solid #333;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 3px;
+            padding: 3px;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .face div {
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+        
+        .front {
+            transform: translateZ(150px);
+        }
+        
+        .back {
+            transform: rotateY(180deg) translateZ(150px);
+        }
+        
+        .right {
+            transform: rotateY(90deg) translateZ(150px);
+        }
+        
+        .left {
+            transform: rotateY(-90deg) translateZ(150px);
+        }
+        
+        .top {
+            transform: rotateX(90deg) translateZ(150px);
+        }
+        
+        .bottom {
+            transform: rotateX(-90deg) translateZ(150px);
+        }
+        
+        .controls-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .main-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .face-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .face-controls button {
+            width: 70px;
+            height: 70px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .color-key {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f8f8f8;
+            padding: 8px 12px;
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .color-box {
+            width: 24px;
+            height: 24px;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+        
+        .instructions {
+            max-width: 800px;
+            margin: 0 auto 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            line-height: 1.6;
+        }
+        
+        .instructions h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .instructions p {
+            margin-bottom: 10px;
+        }
+        
+        .reset-view {
+            margin-top: 10px;
+            background-color: #2196F3;
+        }
+        
+        .reset-view:hover {
+            background-color: #0b7dda;
+        }
+        
+        @media (max-width: 768px) {
+            .cube-container {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .face-controls button {
+                width: 60px;
+                height: 60px;
+                font-size: 20px;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="calculadora">
-    <input type="text" id="pantalla" disabled>
-    <div class="botones">
-      <button onclick="agregar('7')">7</button>
-      <button onclick="agregar('8')">8</button>
-      <button onclick="agregar('9')">9</button>
-      <button onclick="agregar('/')">/</button>
-
-      <button onclick="agregar('4')">4</button>
-      <button onclick="agregar('5')">5</button>
-      <button onclick="agregar('6')">6</button>
-      <button onclick="agregar('*')">*</button>
-
-      <button onclick="agregar('1')">1</button>
-      <button onclick="agregar('2')">2</button>
-      <button onclick="agregar('3')">3</button>
-      <button onclick="agregar('-')">-</button>
-
-      <button onclick="agregar('0')">0</button>
-      <button onclick="agregar('.')">.</button>
-      <button onclick="calcular()">=</button>
-      <button onclick="agregar('+')">+</button>
-
-      <button onclick="limpiar()" style="grid-column: span 4; background-color: #f88;">C</button>
+    <div class="main-container">
+        <h1>Cubo de Rubik 3D Interactivo</h1>
+        
+        <div class="cube-section">
+            <div class="cube-container" id="cube-container">
+                <div class="cube" id="rubik-cube">
+                    <!-- Caras del cubo se generarán dinámicamente con JavaScript -->
+                </div>
+            </div>
+            <button class="reset-view" id="reset-view">Resetear Vista</button>
+        </div>
+        
+        <div class="controls-section">
+            <div class="main-controls">
+                <button id="shuffle-btn">Mezclar Cubo</button>
+                <button id="solve-btn">Resolver Cubo</button>
+            </div>
+            
+            <div class="face-controls">
+                <button data-face="top" data-direction="clockwise">↑</button>
+                <button data-face="front" data-direction="clockwise">↑</button>
+                <button data-face="left" data-direction="clockwise">↑</button>
+                <button data-face="left" data-direction="counter-clockwise">←</button>
+                <button data-face="front" data-direction="counter-clockwise">↓</button>
+                <button data-face="right" data-direction="clockwise">→</button>
+                <button data-face="bottom" data-direction="counter-clockwise">↓</button>
+                <button data-face="back" data-direction="counter-clockwise">↓</button>
+                <button data-face="right" data-direction="counter-clockwise">↓</button>
+            </div>
+            
+            <div class="color-key">
+                <div class="color-item">
+                    <div class="color-box" style="background-color: white;"></div>
+                    <span>Frontal (F)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: yellow;"></div>
+                    <span>Superior (U)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: red;"></div>
+                    <span>Derecha (R)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: orange;"></div>
+                    <span>Izquierda (L)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: blue;"></div>
+                    <span>Inferior (D)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: green;"></div>
+                    <span>Posterior (B)</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Instrucciones:</h3>
+            <p><strong>Rotación 3D:</strong> Arrastra con el mouse/touch para girar el cubo en 3D.</p>
+            <p><strong>Rotar caras:</strong> Usa los botones o teclado (F, B, R, L, U, D - mayúsculas para dirección inversa).</p>
+            <p><strong>Mezclar:</strong> Haz clic en "Mezclar Cubo" para aleatorizar el cubo.</p>
+            <p><strong>Resolver:</strong> Haz clic en "Resolver Cubo" para volver al estado resuelto.</p>
+            <p><strong>Resetear vista:</strong> Haz clic en "Resetear Vista" para volver a la vista inicial.</p>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const pantalla = document.getElementById('pantalla');
-
-    function agregar(valor) {
-      pantalla.value += valor;
-    }
-
-    function calcular() {
-      try {
-        pantalla.value = eval(pantalla.value);
-      } catch {
-        pantalla.value = 'Error';
-      }
-    }
-
-    function limpiar() {
-      pantalla.value = '';
-    }
-  </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Colores de las caras del cubo de Rubik
+            const faceColors = {
+                front: 'white',
+                back: 'green',
+                right: 'red',
+                left: 'orange',
+                top: 'yellow',
+                bottom: 'blue'
+            };
+            
+            // Estado inicial del cubo (resuelto)
+            let cubeState = {
+                front: Array(9).fill('white'),
+                back: Array(9).fill('green'),
+                right: Array(9).fill('red'),
+                left: Array(9).fill('orange'),
+                top: Array(9).fill('yellow'),
+                bottom: Array(9).fill('blue')
+            };
+            
+            // Variables para el control de rotación 3D
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            let currentRotation = { x: -20, y: -30 };
+            const cubeElement = document.getElementById('rubik-cube');
+            const cubeContainer = document.getElementById('cube-container');
+            
+            // Inicializar el cubo
+            initCube();
+            updateCubeRotation();
+            
+            // Botones de control
+            document.getElementById('shuffle-btn').addEventListener('click', shuffleCube);
+            document.getElementById('solve-btn').addEventListener('click', solveCube);
+            document.getElementById('reset-view').addEventListener('click', resetView);
+            
+            // Botones de rotación de caras
+            document.querySelectorAll('.face-controls button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const face = this.getAttribute('data-face');
+                    const direction = this.getAttribute('data-direction');
+                    rotateFace(face, direction === 'clockwise');
+                    updateCubeVisual();
+                });
+            });
+            
+            // Eventos para rotación 3D con mouse
+            cubeContainer.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+            
+            // Eventos para rotación 3D con touch
+            cubeContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+            cubeContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+            cubeContainer.addEventListener('touchend', handleTouchEnd);
+            
+            // Teclado
+            document.addEventListener('keydown', function(e) {
+                const key = e.key.toLowerCase();
+                const shift = e.shiftKey;
+                
+                const keyMappings = {
+                    'f': {face: 'front', clockwise: !shift},
+                    'b': {face: 'back', clockwise: !shift},
+                    'r': {face: 'right', clockwise: !shift},
+                    'l': {face: 'left', clockwise: !shift},
+                    'u': {face: 'top', clockwise: !shift},
+                    'd': {face: 'bottom', clockwise: !shift}
+                };
+                
+                if (keyMappings[key]) {
+                    rotateFace(keyMappings[key].face, keyMappings[key].clockwise);
+                    updateCubeVisual();
+                }
+            });
+            
+            // Funciones para rotación 3D con mouse
+            function startDrag(e) {
+                isDragging = true;
+                previousMousePosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+                cubeContainer.classList.add('grabbing');
+                e.preventDefault();
+            }
+            
+            function drag(e) {
+                if (!isDragging) return;
+                
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                
+                currentRotation.y += deltaX * 0.5;
+                currentRotation.x -= deltaY * 0.5;
+                
+                previousMousePosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+                
+                updateCubeRotation();
+                e.preventDefault();
+            }
+            
+            function endDrag() {
+                isDragging = false;
+                cubeContainer.classList.remove('grabbing');
+            }
+            
+            // Funciones para rotación 3D con touch
+            function handleTouchStart(e) {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    previousMousePosition = {
+                        x: e.touches[0].clientX,
+                        y: e.touches[0].clientY
+                    };
+                    cubeContainer.classList.add('grabbing');
+                }
+                e.preventDefault();
+            }
+            
+            function handleTouchMove(e) {
+                if (!isDragging || e.touches.length !== 1) return;
+                
+                const deltaX = e.touches[0].clientX - previousMousePosition.x;
+                const deltaY = e.touches[0].clientY - previousMousePosition.y;
+                
+                currentRotation.y += deltaX * 0.5;
+                currentRotation.x -= deltaY * 0.5;
+                
+                previousMousePosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+                
+                updateCubeRotation();
+                e.preventDefault();
+            }
+            
+            function handleTouchEnd() {
+                isDragging = false;
+                cubeContainer.classList.remove('grabbing');
+            }
+            
+            // Actualizar rotación 3D del cubo
+            function updateCubeRotation() {
+                // Limitar la rotación vertical para evitar voltear el cubo
+                currentRotation.x = Math.max(-90, Math.min(90, currentRotation.x));
+                
+                cubeElement.style.transform = `rotateX(${currentRotation.x}deg) rotateY(${currentRotation.y}deg)`;
+            }
+            
+            // Resetear vista 3D
+            function resetView() {
+                currentRotation = { x: -20, y: -30 };
+                updateCubeRotation();
+            }
+            
+            // Inicializar el cubo visualmente
+            function initCube() {
+                cubeElement.innerHTML = '';
+                
+                // Crear las 6 caras del cubo
+                for (const [faceName, faceColor] of Object.entries(faceColors)) {
+                    const faceElement = document.createElement('div');
+                    faceElement.className = `face ${faceName}`;
+                    
+                    // Crear los 9 cubitos de cada cara
+                    for (let i = 0; i < 9; i++) {
+                        const sticker = document.createElement('div');
+                        sticker.style.backgroundColor = faceColor;
+                        faceElement.appendChild(sticker);
+                    }
+                    
+                    cubeElement.appendChild(faceElement);
+                }
+            }
+            
+            // Actualizar la representación visual del cubo según el estado actual
+            function updateCubeVisual() {
+                for (const [faceName, stickers] of Object.entries(cubeState)) {
+                    const faceElement = document.querySelector(`.${faceName}`);
+                    const stickerElements = faceElement.children;
+                    
+                    for (let i = 0; i < 9; i++) {
+                        stickerElements[i].style.backgroundColor = stickers[i];
+                    }
+                }
+            }
+            
+            // Rotar una cara del cubo
+            function rotateFace(face, clockwise = true) {
+                // Rotar los stickers de la cara principal
+                const rotatedFace = rotateMatrix(cubeState[face], clockwise);
+                cubeState[face] = rotatedFace;
+                
+                // Rotar los stickers adyacentes
+                if (face === 'front') {
+                    rotateAdjacentFront(clockwise);
+                } else if (face === 'back') {
+                    rotateAdjacentBack(clockwise);
+                } else if (face === 'right') {
+                    rotateAdjacentRight(clockwise);
+                } else if (face === 'left') {
+                    rotateAdjacentLeft(clockwise);
+                } else if (face === 'top') {
+                    rotateAdjacentTop(clockwise);
+                } else if (face === 'bottom') {
+                    rotateAdjacentBottom(clockwise);
+                }
+            }
+            
+            // Rotar una matriz 3x3 (representada como array de 9 elementos)
+            function rotateMatrix(matrix, clockwise) {
+                const newMatrix = [...matrix];
+                
+                if (clockwise) {
+                    // Rotación en sentido horario
+                    newMatrix[0] = matrix[6];
+                    newMatrix[1] = matrix[3];
+                    newMatrix[2] = matrix[0];
+                    newMatrix[3] = matrix[7];
+                    newMatrix[5] = matrix[1];
+                    newMatrix[6] = matrix[8];
+                    newMatrix[7] = matrix[5];
+                    newMatrix[8] = matrix[2];
+                } else {
+                    // Rotación en sentido antihorario
+                    newMatrix[0] = matrix[2];
+                    newMatrix[1] = matrix[5];
+                    newMatrix[2] = matrix[8];
+                    newMatrix[3] = matrix[1];
+                    newMatrix[5] = matrix[7];
+                    newMatrix[6] = matrix[0];
+                    newMatrix[7] = matrix[3];
+                    newMatrix[8] = matrix[6];
+                }
+                
+                return newMatrix;
+            }
+            
+            // Funciones para rotar las caras adyacentes
+            function rotateAdjacentFront(clockwise) {
+                const topRow = [cubeState.top[6], cubeState.top[7], cubeState.top[8]];
+                const rightCol = [cubeState.right[0], cubeState.right[3], cubeState.right[6]];
+                const bottomRow = [cubeState.bottom[2], cubeState.bottom[1], cubeState.bottom[0]];
+                const leftCol = [cubeState.left[2], cubeState.left[5], cubeState.left[8]];
+                
+                if (clockwise) {
+                    // Rotación en sentido horario
+                    cubeState.right[0] = topRow[0];
+                    cubeState.right[3] = topRow[1];
+                    cubeState.right[6] = topRow[2];
+                    
+                    cubeState.bottom[0] = rightCol[2];
+                    cubeState.bottom[1] = rightCol[1];
+                    cubeState.bottom[2] = rightCol[0];
+                    
+                    cubeState.left[2] = bottomRow[0];
+                    cubeState.left[5] = bottomRow[1];
+                    cubeState.left[8] = bottomRow[2];
+                    
+                    cubeState.top[6] = leftCol[2];
+                    cubeState.top[7] = leftCol[1];
+                    cubeState.top[8] = leftCol[0];
+                } else {
+                    // Rotación en sentido antihorario
+                    cubeState.top[6] = rightCol[0];
+                    cubeState.top[7] = rightCol[1];
+                    cubeState.top[8] = rightCol[2];
+                    
+                    cubeState.right[0] = bottomRow[2];
+                    cubeState.right[3] = bottomRow[1];
+                    cubeState.right[6] = bottomRow[0];
+                    
+                    cubeState.bottom[0] = leftCol[0];
+                    cubeState.bottom[1] = leftCol[1];
+                    cubeState.bottom[2] = leftCol[2];
+                    
+                    cubeState.left[2] = topRow[2];
+                    cubeState.left[5] = topRow[1];
+                    cubeState.left[8] = topRow[0];
+                }
+            }
+            
+            function rotateAdjacentBack(clockwise) {
+                const topRow = [cubeState.top[2], cubeState.top[1], cubeState.top[0]];
+                const leftCol = [cubeState.left[0], cubeState.left[3], cubeState.left[6]];
+                const bottomRow = [cubeState.bottom[6], cubeState.bottom[7], cubeState.bottom[8]];
+                const rightCol = [cubeState.right[2], cubeState.right[5], cubeState.right[8]];
+                
+                if (clockwise) {
+                    // Rotación en sentido horario
+                    cubeState.left[0] = topRow[0];
+                    cubeState.left[3] = topRow[1];
+                    cubeState.left[6] = topRow[2];
+                    
+                    cubeState.bottom[6] = leftCol[2];
+                    cubeState.bottom[7] = leftCol[1];
+                    cubeState.bottom[8] = leftCol[0];
+                    
+                    cubeState.right[2] = bottomRow[0];
+                    cubeState.right[5] = bottomRow[1];
+                    cubeState.right[8] = bottomRow[2];
+                    
+                    cubeState.top[0] = rightCol[2];
+                    cubeState.top[1] = rightCol[1];
+                    cubeState.top[2] = rightCol[0];
+                } else {
+                    // Rotación en sentido antihorario
+                    cubeState.top[0] = leftCol[2];
+                    cubeState.top[1] = leftCol[1];
+                    cubeState.top[2] = leftCol[0];
+                    
+                    cubeState.left[0] = bottomRow[0];
+                    cubeState.left[3] = bottomRow[1];
+                    cubeState.left[6] = bottomRow[2];
+                    
+                    cubeState.bottom[6] = rightCol[2];
+                    cubeState.bottom[7] = rightCol[1];
+                    cubeState.bottom[8] = rightCol[0];
+                    
+                    cubeState.right[2] = topRow[2];
+                    cubeState.right[5] = topRow[1];
+                    cubeState.right[8] = topRow[0];
+                }
+            }
+            
+            function rotateAdjacentRight(clockwise) {
+                const topCol = [cubeState.top[2], cubeState.top[5], cubeState.top[8]];
+                const frontCol = [cubeState.front[2], cubeState.front[5], cubeState.front[8]];
+                const bottomCol = [cubeState.bottom[2], cubeState.bottom[5], cubeState.bottom[8]];
+                const backCol = [cubeState.back[0], cubeState.back[3], cubeState.back[6]];
+                
+                if (clockwise) {
+                    // Rotación en sentido horario
+                    cubeState.front[2] = topCol[0];
+                    cubeState.front[5] = topCol[1];
+                    cubeState.front[8] = topCol[2];
+                    
+                    cubeState.bottom[2] = frontCol[0];
+                    cubeState.bottom[5] = frontCol[1];
+                    cubeState.bottom[8] = frontCol[2];
+                    
+                    cubeState.back[6] = bottomCol[0];
+                    cubeState.back[3] = bottomCol[1];
+                    cubeState.back[0] = bottomCol[2];
+                    
+                    cubeState.top[2] = backCol[0];
+                    cubeState.top[5] = backCol[1];
+                    cubeState.top[8] = backCol[2];
+                } else {
+                    // Rotación en sentido antihorario
+                    cubeState.top[2] = frontCol[0];
+                    cubeState.top[5] = frontCol[1];
+                    cubeState.top[8] = frontCol[2];
+                    
+                    cubeState.front[2] = bottomCol[0];
+                    cubeState.front[5] = bottomCol[1];
+                    cubeState.front[8] = bottomCol[2];
+                    
+                    cubeState.bottom[2] = backCol[2];
+                    cubeState.bottom[5] = backCol[1];
+                    cubeState.bottom[8] = backCol[0];
+                    
+                    cubeState.back[0] = topCol[2];
+                    cubeState.back[3] = topCol[1];
+                    cubeState.back[6] = topCol[0];
+                }
+            }
+            
+            function rotateAdjacentLeft(clockwise) {
+                const topCol = [cubeState.top[0], cubeState.top[3], cubeState.top[6]];
+                const backCol = [cubeState.back[2], cubeState.back[5], cubeState.back[8]];
+                const bottomCol = [cubeState.bottom[0], cubeState.bottom[3], cubeState.bottom[6]];
+                const frontCol = [cubeState.front[0], cubeState.front[3], cubeState.front[6]];
+                
+                if (clockwise) {
+                    // Rotación en sentido horario
+                    cubeState.back[8] = topCol[0];
+                    cubeState.back[5] = topCol[1];
+                    cubeState.back[2] = topCol[2];
+                    
+                    cubeState.bottom[0] = backCol[0];
+                    cubeState.bottom[3] = backCol[1];
+                    cubeState.bottom[6] = backCol[2];
+                    
+                    cubeState.front[0] = bottomCol[0];
+                    cubeState.front[3] = bottomCol[1];
+                    cubeState.front[6] = bottomCol[2];
+                    
+                    cubeState.top[0] = frontCol[0];
+                    cubeState.top[3] = frontCol[1];
+                    cubeState.top[6] = frontCol[2];
+                } else {
+                    // Rotación en sentido antihorario
+                    cubeState.top[0] = backCol[2];
+                    cubeState.top[3] = backCol[1];
+                    cubeState.top[6] = backCol[0];
+                    
+                    cubeState.back[2] = bottomCol[0];
+                    cubeState.back[5] = bottomCol[1];
+                    cubeState.back[8] = bottomCol[2];
+                    
+                    cubeState.bottom[0] = frontCol[0];
+                    cubeState.bottom[3] = frontCol[1];
+                    cubeState.bottom[6] = frontCol[2];
+                    
+                    cubeState.front[0] = topCol[0];
+                    cubeState.front[3] = topCol[1];
+                    cubeState.front[6] = topCol[2];
+                }
+            }
+            
+            function rotateAdjacentTop(clockwise) {
+                const backRow = [cubeState.back[0], cubeState.back[1], cubeState.back[2]];
+                const rightRow = [cubeState.right[0], cubeState.right[1], cubeState.right[2]];
+                const frontRow = [cubeState.front[0], cubeState.front[1], cubeState.front[2]];
+                const leftRow = [cubeState.left[0], cubeState.left[1], cubeState.left[2]];
+                
+                if (clockwise) {
+                    // Rotación en sentido horario
+                    cubeState.right[0] = backRow[0];
+                    cubeState.right[1] = backRow[1];
+                    cubeState.right[2] = backRow[2];
+                    
+                    cubeState.front[0] = rightRow[0];
+                    cubeState.front[1] = rightRow[1];
+                    cubeState.front[2] = rightRow[2];
+                    
+                    cubeState.left[0] = frontRow[0];
+                    cubeState.left[1] = frontRow[1];
+                    cubeState.left[2] = frontRow[2];
+                    
+                    cubeState.back[0] = leftRow[0];
+                    cubeState.back[1] = leftRow[1];
+                    cubeState.back[2] = leftRow[2];
+                } else {
+                    // Rotación en sentido antihorario
+                    cubeState.back[0] = rightRow[0];
+                    cubeState.back[1] = rightRow[1];
+                    cubeState.back[2] = rightRow[2];
+                    
+                    cubeState.right[0] = frontRow[0];
+                    cubeState.right[1] = frontRow[1];
+                    cubeState.right[2] = frontRow[2];
+                    
+                    cubeState.front[0] = leftRow[0];
+                    cubeState.front[1] = leftRow[1];
+                    cubeState.front[2] = leftRow[2];
+                    
+                    cubeState.left[0] = backRow[0];
+                    cubeState.left[1] = backRow[1];
+                    cubeState.left[2] = backRow[2];
+                }
+            }
+            
+            function rotateAdjacentBottom(clockwise) {
+                const frontRow = [cubeState.front[6], cubeState.front[7], cubeState.front[8]];
+                const rightRow = [cubeState.right[6], cubeState.right[7], cubeState.right[8]];
+                const backRow = [cubeState.back[6], cubeState.back[7], cubeState.back[8]];
+                const leftRow = [cubeState.left[6], cubeState.left[7], cubeState.left[8]];
+                
+                if (clockwise) {
+                    // Rotación en sentido horario
+                    cubeState.right[6] = frontRow[0];
+                    cubeState.right[7] = frontRow[1];
+                    cubeState.right[8] = frontRow[2];
+                    
+                    cubeState.back[6] = rightRow[0];
+                    cubeState.back[7] = rightRow[1];
+                    cubeState.back[8] = rightRow[2];
+                    
+                    cubeState.left[6] = backRow[0];
+                    cubeState.left[7] = backRow[1];
+                    cubeState.left[8] = backRow[2];
+                    
+                    cubeState.front[6] = leftRow[0];
+                    cubeState.front[7] = leftRow[1];
+                    cubeState.front[8] = leftRow[2];
+                } else {
+                    // Rotación en sentido antihorario
+                    cubeState.front[6] = rightRow[0];
+                    cubeState.front[7] = rightRow[1];
+                    cubeState.front[8] = rightRow[2];
+                    
+                    cubeState.right[6] = backRow[0];
+                    cubeState.right[7] = backRow[1];
+                    cubeState.right[8] = backRow[2];
+                    
+                    cubeState.back[6] = leftRow[0];
+                    cubeState.back[7] = leftRow[1];
+                    cubeState.back[8] = leftRow[2];
+                    
+                    cubeState.left[6] = frontRow[0];
+                    cubeState.left[7] = frontRow[1];
+                    cubeState.left[8] = frontRow[2];
+                }
+            }
+            
+            // Mezclar el cubo aleatoriamente
+            function shuffleCube() {
+                const faces = ['front', 'back', 'right', 'left', 'top', 'bottom'];
+                const directions = [true, false]; // true = clockwise, false = counter-clockwise
+                
+                // Realizar 20 movimientos aleatorios
+                for (let i = 0; i < 20; i++) {
+                    const randomFace = faces[Math.floor(Math.random() * faces.length)];
+                    const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+                    rotateFace(randomFace, randomDirection);
+                }
+                
+                updateCubeVisual();
+            }
+            
+            // Resolver el cubo (volver al estado inicial)
+            function solveCube() {
+                cubeState = {
+                    front: Array(9).fill('white'),
+                    back: Array(9).fill('green'),
+                    right: Array(9).fill('red'),
+                    left: Array(9).fill('orange'),
+                    top: Array(9).fill('yellow'),
+                    bottom: Array(9).fill('blue')
+                };
+                
+                updateCubeVisual();
+            }
+        });
+    </script>
 </body>
 </html>
